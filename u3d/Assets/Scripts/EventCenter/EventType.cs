@@ -2,7 +2,7 @@
 {
     public enum EventType
     {
-        ShowWnd,
+        Test_AWindow,
     }
 
 }

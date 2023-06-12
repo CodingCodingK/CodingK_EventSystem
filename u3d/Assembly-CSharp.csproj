@@ -41,17 +41,14 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\EventCenter\EventType.cs" />
-     <Compile Include="Assets\Scripts\EventCenter\CallBack.cs" />
-     <Compile Include="Assets\Scripts\EventCenter\EventCenter.cs" />
      <Compile Include="Assets\Scripts\EventCenter\PriorityDelegate.cs" />
+     <Compile Include="Assets\Scripts\EventCenter\EventType.cs" />
+     <Compile Include="Assets\Scripts\EventCenter\EventCenter.cs" />
+     <Compile Include="Assets\Scripts\BWindow.cs" />
+     <Compile Include="Assets\Scripts\AWindow.cs" />
      <Folder Include="Assets" />
-     <Folder Include="Assets\Resources\UIImages" />
      <Folder Include="Assets\Scripts\EventCenter" />
      <Folder Include="Assets\Scripts" />
-     <Folder Include="Assets\Resources\UIWindow" />
-     <Folder Include="Assets\Resources" />
-     <Folder Include="Assets\Resources\ResFonts" />
      <Folder Include="Assets\Scenes" />
      <Reference Include="UnityEngine">
      <HintPath>D:\soft\Unity\2021.3.19f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>

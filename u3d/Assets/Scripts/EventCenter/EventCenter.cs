@@ -1,54 +1,72 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace CodingK_SystemCenter
 {
+    /// <summary>
+    /// 不依赖于UnityEngine
+    /// 按照优先级进入
+    /// callback默认加入队尾
+    /// </summary>
     public class EventCenter
     {
-        // TODO 封装委托，让它带优先级，然后fire的时候把委托链按优先级排序再fire
-        private static Dictionary<EventType, Delegate> _eventDic = new();
+        // TODO 有空实现一个业务委托链完成后，自动衔接执行另一个委托链
+        private static Dictionary<EventType, PriorityDelegateListAbstract> _eventDic = new();
         
-        private static void OnListenerAdding(EventType eventType, Delegate callBack)
+        private static void OnListenerAdding(EventType eventType, PriorityDelegate callBack)
         {
-            if (!_eventDic.ContainsKey(eventType))
-            {
-                _eventDic.Add(eventType, null);
-            }
-
-            Delegate d = _eventDic[eventType];
-            if (d != null && d.GetType() != callBack.GetType())
+            OnListenerAdding(eventType, callBack?.CallBack);
+        }
+        
+        private static bool OnListenerAdding(EventType eventType, Delegate callBack)
+        {
+            bool had = _eventDic.TryGetValue(eventType,out var d);
+            if (d?.Count > 0 && d.First.CallBack.GetType() != callBack.GetType())
             {
                 throw new Exception(
-                    $"OnListenerAdding Error: Trying add EventType [{eventType}] delegate, need delegate type is [{d.GetType()}], adding delegate type is[{callBack.GetType()}]");
+                    $"OnListenerAdding Error: Trying add EventType [{eventType}] delegate, need delegate type is [{d.First.CallBack?.GetType()}], adding delegate type is[{callBack.GetType()}]");
             }
+
+            return had;
         }
 
-        private static void OnListenerRemoving(EventType eventType, Delegate callBack)
+        private static bool OnListenerRemoving(EventType eventType)
         {
-            if (_eventDic.ContainsKey(eventType))
+            if (_eventDic.TryGetValue(eventType, out var d))
             {
-                Delegate d = _eventDic[eventType];
-                if (d == null)
+                if (d == null || d.Count < 1)
                 {
-                    throw new Exception($"OnListenerRemoving Error: Data Null, EventType Key = {eventType}");
-                }
-                else if (d.GetType() != callBack.GetType())
-                {
-                    throw new Exception(
-                        $"ListenerRemoving Error: Trying remove EventType [{eventType}] key-value-pair, need value type is [{d.GetType()}], removing value type is[{callBack.GetType()}]");
+                    OnListenerRemoved(eventType);
+                    return false;
                 }
             }
-            else
-            {
-                throw new Exception($"OnListenerRemoving Error: No such EventType Key = {eventType}");
-            }
+
+            return true;
         }
+        
+        // private static void OnListenerRemoving(EventType eventType, Delegate callBack)
+        // {
+        //     if (_eventDic.TryGetValue(eventType, out var d))
+        //     {
+        //         if (d == null || d.Count < 1)
+        //         {
+        //             throw new Exception($"OnListenerRemoving Error: Data Null or Empty, EventType Key = {eventType}");
+        //         }
+        //         else if (d.First.CallBack.GetType() != callBack.GetType())
+        //         {
+        //             throw new Exception(
+        //                 $"ListenerRemoving Error: Trying remove EventType [{eventType}] key-value-pair, need value type is [{d.First?.CallBack?.GetType()}], removing value type is[{callBack.GetType()}]");
+        //         }
+        //     }
+        //     else
+        //     {
+        //         throw new Exception($"OnListenerRemoving Error: No such EventType Key = {eventType}");
+        //     }
+        // }
 
         private static void OnListenerRemoved(EventType eventType)
         {
-            if (_eventDic[eventType] == null)
+            if (_eventDic[eventType] == null || _eventDic[eventType].Count < 1)
             {
                 _eventDic.Remove(eventType);
             }
@@ -58,194 +76,136 @@ namespace CodingK_SystemCenter
 
         
         //0 parameters
-        public static void AddListener(EventType eventType, CallBack callBack)
+        public static void AddListener(EventType eventType, Action callBack, int priority = int.MaxValue, string name = null)
         {
-            OnListenerAdding(eventType, callBack);
-            _eventDic[eventType] = (CallBack) _eventDic[eventType] + callBack;
+            if(!OnListenerAdding(eventType, callBack))
+                _eventDic.Add(eventType, new PriorityDelegateList());
+            
+            ((PriorityDelegateList)_eventDic[eventType]).Add(callBack, priority, name);
         }
 
         //1 parameters
-        public static void AddListener<T>(EventType eventType, CallBack<T> callBack)
+        public static void AddListener<T>(EventType eventType, Action<T> callBack, int priority = int.MaxValue, string name = null)
         {
-            OnListenerAdding(eventType, callBack);
-            _eventDic[eventType] = (CallBack<T>) _eventDic[eventType] + callBack;
+            if(!OnListenerAdding(eventType, callBack))
+                _eventDic.Add(eventType, new PriorityDelegateList<T>());
+            
+            ((PriorityDelegateList<T>)_eventDic[eventType]).Add(callBack, priority, name);
         }
 
         //2 parameters
-        public static void AddListener<T, X>(EventType eventType, CallBack<T, X> callBack)
+        public static void AddListener<T1,T2>(EventType eventType, Action<T1,T2> callBack, int priority = int.MaxValue, string name = null)
         {
-            OnListenerAdding(eventType, callBack);
-            _eventDic[eventType] = (CallBack<T, X>) _eventDic[eventType] + callBack;
+            if(!OnListenerAdding(eventType, callBack))
+                _eventDic.Add(eventType, new PriorityDelegateList<T1,T2>());
+            
+            ((PriorityDelegateList<T1,T2>)_eventDic[eventType]).Add(callBack, priority, name);
         }
 
         //3 parameters
-        public static void AddListener<T, X, Y>(EventType eventType, CallBack<T, X, Y> callBack)
+        public static void AddListener<T1,T2,T3>(EventType eventType, Action<T1,T2,T3> callBack, int priority = int.MaxValue, string name = null)
         {
-            OnListenerAdding(eventType, callBack);
-            _eventDic[eventType] = (CallBack<T, X, Y>) _eventDic[eventType] + callBack;
+            if(!OnListenerAdding(eventType, callBack))
+                _eventDic.Add(eventType, new PriorityDelegateList<T1,T2,T3>());
+            
+            ((PriorityDelegateList<T1,T2,T3>)_eventDic[eventType]).Add(callBack, priority, name);
         }
 
         //4 parameters
-        public static void AddListener<T, X, Y, Z>(EventType eventType, CallBack<T, X, Y, Z> callBack)
+        public static void AddListener<T1,T2,T3,T4>(EventType eventType, Action<T1,T2,T3,T4> callBack, int priority = int.MaxValue, string name = null)
         {
-            OnListenerAdding(eventType, callBack);
-            _eventDic[eventType] = (CallBack<T, X, Y, Z>) _eventDic[eventType] + callBack;
+            if(!OnListenerAdding(eventType, callBack))
+                _eventDic.Add(eventType, new PriorityDelegateList<T1,T2,T3,T4>());
+            
+            ((PriorityDelegateList<T1,T2,T3,T4>)_eventDic[eventType]).Add(callBack, priority, name);
         }
 
         //5 parameters
-        public static void AddListener<T, X, Y, Z, W>(EventType eventType, CallBack<T, X, Y, Z, W> callBack)
+        public static void AddListener<T1,T2,T3,T4,T5>(EventType eventType, Action<T1,T2,T3,T4,T5> callBack, int priority = int.MaxValue, string name = null)
         {
-            OnListenerAdding(eventType, callBack);
-            _eventDic[eventType] = (CallBack<T, X, Y, Z, W>) _eventDic[eventType] + callBack;
+            if(!OnListenerAdding(eventType, callBack))
+                _eventDic.Add(eventType, new PriorityDelegateList<T1,T2,T3,T4,T5>());
+            
+            ((PriorityDelegateList<T1,T2,T3,T4,T5>)_eventDic[eventType]).Add(callBack, priority, name);
+        }
+
+        //each parameter
+        public static bool RemoveListener(EventType eventType, string cbName)
+        {
+            if (!OnListenerRemoving(eventType)) return false;
+            bool isSuccess = _eventDic[eventType].Remove(cbName);
+            OnListenerRemoved(eventType);
+            return isSuccess;
         }
 
         //0 parameters
-        public static void RemoveListener(EventType eventType, CallBack callBack)
+        public static void Trigger(EventType eventType)
         {
-            OnListenerRemoving(eventType, callBack);
-            _eventDic[eventType] = (CallBack) _eventDic[eventType] - callBack;
-            OnListenerRemoved(eventType);
-        }
-
-        //1 parameters
-        public static void RemoveListener<T>(EventType eventType, CallBack<T> callBack)
-        {
-            OnListenerRemoving(eventType, callBack);
-            _eventDic[eventType] = (CallBack<T>) _eventDic[eventType] - callBack;
-            OnListenerRemoved(eventType);
-        }
-
-        //2 parameters
-        public static void RemoveListener<T, X>(EventType eventType, CallBack<T, X> callBack)
-        {
-            OnListenerRemoving(eventType, callBack);
-            _eventDic[eventType] = (CallBack<T, X>) _eventDic[eventType] - callBack;
-            OnListenerRemoved(eventType);
-        }
-
-        //3 parameters
-        public static void RemoveListener<T, X, Y>(EventType eventType, CallBack<T, X, Y> callBack)
-        {
-            OnListenerRemoving(eventType, callBack);
-            _eventDic[eventType] = (CallBack<T, X, Y>) _eventDic[eventType] - callBack;
-            OnListenerRemoved(eventType);
-        }
-
-        //4 parameters
-        public static void RemoveListener<T, X, Y, Z>(EventType eventType, CallBack<T, X, Y, Z> callBack)
-        {
-            OnListenerRemoving(eventType, callBack);
-            _eventDic[eventType] = (CallBack<T, X, Y, Z>) _eventDic[eventType] - callBack;
-            OnListenerRemoved(eventType);
-        }
-
-        //5 parameters
-        public static void RemoveListener<T, X, Y, Z, W>(EventType eventType, CallBack<T, X, Y, Z, W> callBack)
-        {
-            OnListenerRemoving(eventType, callBack);
-            _eventDic[eventType] = (CallBack<T, X, Y, Z, W>) _eventDic[eventType] - callBack;
-            OnListenerRemoved(eventType);
-        }
-
-
-        //0 parameters
-        public static void TriggerEvent(EventType eventType)
-        {
-            Delegate d;
-            if (_eventDic.TryGetValue(eventType, out d))
+            if (_eventDic.TryGetValue(eventType, out var d))
             {
-                if (d is CallBack callBack)
+                if (d is PriorityDelegateList list)
                 {
-                    callBack();
-                }
-                else
-                {
-                    throw new Exception($"TriggerEvent Error: EventType {eventType}");
+                    list.Fire();
                 }
             }
         }
 
         //1 parameters
-        public static void TriggerEvent<T>(EventType eventType, T arg)
+        public static void Trigger<T>(EventType eventType, T p1)
         {
-            Delegate d;
-            if (_eventDic.TryGetValue(eventType, out d))
+            if (_eventDic.TryGetValue(eventType, out var d))
             {
-                if (d is CallBack<T> callBack)
+                if (d is PriorityDelegateList<T> list)
                 {
-                    callBack(arg);
-                }
-                else
-                {
-                    throw new Exception($"TriggerEvent Error: EventType {eventType}");
+                    list.Fire(p1);
                 }
             }
         }
 
         //2 parameters
-        public static void TriggerEvent<T, X>(EventType eventType, T arg1, X arg2)
+        public static void Trigger<T1,T2>(EventType eventType, T1 p1, T2 p2)
         {
-            Delegate d;
-            if (_eventDic.TryGetValue(eventType, out d))
+            if (_eventDic.TryGetValue(eventType, out var d))
             {
-                if (d is CallBack<T, X> callBack)
+                if (d is PriorityDelegateList<T1,T2> list)
                 {
-                    callBack(arg1, arg2);
-                }
-                else
-                {
-                    throw new Exception($"TriggerEvent Error: EventType {eventType}");
+                    list.Fire(p1,p2);
                 }
             }
         }
 
         //3 parameters
-        public static void TriggerEvent<T, X, Y>(EventType eventType, T arg1, X arg2, Y arg3)
+        public static void Trigger<T1,T2,T3>(EventType eventType, T1 p1, T2 p2, T3 p3)
         {
-            Delegate d;
-            if (_eventDic.TryGetValue(eventType, out d))
+            if (_eventDic.TryGetValue(eventType, out var d))
             {
-                if (d as CallBack<T, X, Y> is { } callBack)
+                if (d is PriorityDelegateList<T1,T2,T3> list)
                 {
-                    callBack(arg1, arg2, arg3);
-                }
-                else
-                {
-                    throw new Exception($"TriggerEvent Error: EventType {eventType}");
+                    list.Fire(p1,p2,p3);
                 }
             }
         }
 
         //4 parameters
-        public static void TriggerEvent<T, X, Y, Z>(EventType eventType, T arg1, X arg2, Y arg3, Z arg4)
+        public static void Trigger<T1,T2,T3,T4>(EventType eventType, T1 p1, T2 p2, T3 p3, T4 p4)
         {
-            Delegate d;
-            if (_eventDic.TryGetValue(eventType, out d))
+            if (_eventDic.TryGetValue(eventType, out var d))
             {
-                if (d as CallBack<T, X, Y, Z> is { } callBack)
+                if (d is PriorityDelegateList<T1,T2,T3,T4> list)
                 {
-                    callBack(arg1, arg2, arg3, arg4);
-                }
-                else
-                {
-                    throw new Exception($"TriggerEvent Error: EventType {eventType}");
+                    list.Fire(p1,p2,p3,p4);
                 }
             }
         }
 
         //5 parameters
-        public static void TriggerEvent<T, X, Y, Z, W>(EventType eventType, T arg1, X arg2, Y arg3, Z arg4, W arg5)
+        public static void Trigger<T1,T2,T3,T4,T5>(EventType eventType, T1 p1, T2 p2, T3 p3, T4 p4, T5 p5)
         {
-            Delegate d;
-            if (_eventDic.TryGetValue(eventType, out d))
+            if (_eventDic.TryGetValue(eventType, out var d))
             {
-                if (d as CallBack<T, X, Y, Z, W> is { } callBack)
+                if (d is PriorityDelegateList<T1,T2,T3,T4,T5> list)
                 {
-                    callBack(arg1, arg2, arg3, arg4, arg5);
-                }
-                else
-                {
-                    throw new Exception($"TriggerEvent Error: EventType {eventType}");
+                    list.Fire(p1,p2,p3,p4,p5);
                 }
             }
         }
