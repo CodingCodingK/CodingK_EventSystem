@@ -42,10 +42,10 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\EventCenter\PriorityDelegate.cs" />
-     <Compile Include="Assets\Scripts\EventCenter\EventType.cs" />
-     <Compile Include="Assets\Scripts\EventCenter\EventCenter.cs" />
      <Compile Include="Assets\Scripts\BWindow.cs" />
+     <Compile Include="Assets\Scripts\EventCenter\EventType.cs" />
      <Compile Include="Assets\Scripts\AWindow.cs" />
+     <Compile Include="Assets\Scripts\EventCenter\EventCenter.cs" />
      <Folder Include="Assets" />
      <Folder Include="Assets\Scripts\EventCenter" />
      <Folder Include="Assets\Scripts" />
