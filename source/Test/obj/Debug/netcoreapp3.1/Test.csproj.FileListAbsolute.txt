@@ -1,0 +1,14 @@
+C:\Github\CodingK_EventSystem\source\Test\bin\Debug\netcoreapp3.1\Test.exe
+C:\Github\CodingK_EventSystem\source\Test\bin\Debug\netcoreapp3.1\Test.deps.json
+C:\Github\CodingK_EventSystem\source\Test\bin\Debug\netcoreapp3.1\Test.runtimeconfig.json
+C:\Github\CodingK_EventSystem\source\Test\bin\Debug\netcoreapp3.1\Test.runtimeconfig.dev.json
+C:\Github\CodingK_EventSystem\source\Test\bin\Debug\netcoreapp3.1\Test.dll
+C:\Github\CodingK_EventSystem\source\Test\bin\Debug\netcoreapp3.1\Test.pdb
+C:\Github\CodingK_EventSystem\source\Test\obj\Debug\netcoreapp3.1\Test.csproj.AssemblyReference.cache
+C:\Github\CodingK_EventSystem\source\Test\obj\Debug\netcoreapp3.1\Test.GeneratedMSBuildEditorConfig.editorconfig
+C:\Github\CodingK_EventSystem\source\Test\obj\Debug\netcoreapp3.1\Test.AssemblyInfoInputs.cache
+C:\Github\CodingK_EventSystem\source\Test\obj\Debug\netcoreapp3.1\Test.AssemblyInfo.cs
+C:\Github\CodingK_EventSystem\source\Test\obj\Debug\netcoreapp3.1\Test.csproj.CoreCompileInputs.cache
+C:\Github\CodingK_EventSystem\source\Test\obj\Debug\netcoreapp3.1\Test.dll
+C:\Github\CodingK_EventSystem\source\Test\obj\Debug\netcoreapp3.1\Test.pdb
+C:\Github\CodingK_EventSystem\source\Test\obj\Debug\netcoreapp3.1\Test.genruntimeconfig.cache

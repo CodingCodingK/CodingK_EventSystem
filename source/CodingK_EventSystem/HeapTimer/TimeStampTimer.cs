@@ -13,12 +13,13 @@ namespace CodingK_EventSystem.HeapTimer
     /// 可以传入Delay，但也是用时间点为目标。
     /// 可以配合最小堆优先队列实现定时器。
     /// </summary>
-    internal class TimeStampTimer : CodingKTimer
+    public class TimeStampTimer : CodingKTimer
     {
         private const string tidLock = "TimeStampTimer_tidLock";
 
         private readonly DateTime startDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
         private readonly HeapPriorityQueue<TimeStampTask> taskQueue;
+        private readonly Dictionary<int, TimeStampTask> taskDic;
         private readonly Thread timerThread;
         private readonly ConcurrentQueue<TimeStampTaskPack> packQue;
         private readonly bool setHandle;
@@ -33,6 +34,7 @@ namespace CodingK_EventSystem.HeapTimer
         public TimeStampTimer(int interval = 0, bool setHandle = true, int capacity = 16)
         {
             taskQueue = new HeapPriorityQueue<TimeStampTask>(capacity);
+            taskDic = new Dictionary<int, TimeStampTask>();
             this.setHandle = setHandle;
 
             if (setHandle)
@@ -89,14 +91,10 @@ namespace CodingK_EventSystem.HeapTimer
         {
             double nowTime = GetUtcMs();
 
-
-            foreach (var item in taskQueue)
+            while (taskQueue.Count > 0)
             {
-                TimeStampTask task = item.Value;
-                if (nowTime < task.destTime)
-                {
-                    continue;
-                }
+                TimeStampTask task = taskQueue.Peek();
+                if (task.destTime > nowTime) break;
 
                 ++task.loopIndex;
 
@@ -106,7 +104,7 @@ namespace CodingK_EventSystem.HeapTimer
                     if (task.count == 0)
                     {
                         // 线程安全字典，遍历过程中删除无影响。
-                        FinishTask(task.tid);
+                        FinishFirstTask();
                     }
                     else
                     {
@@ -123,17 +121,15 @@ namespace CodingK_EventSystem.HeapTimer
             }
         }
 
-        void FinishTask(int tid)
+        void FinishFirstTask()
         {
-            if (taskQueue.TryRemove(tid, out TimeStampTask task))
-            {
-                CallTaskCB(tid, task.taskCB);
-                task.taskCB = null;
-            }
-            else
-            {
-                WarnFunc?.Invoke($"KEY:{tid} remove failed when finished task.");
-            }
+            if (taskQueue?.Count < 1) WarnFunc?.Invoke($"FinishFirstTask: remove failed when finished task.");
+
+            TimeStampTask task = taskQueue.Dequeue();
+            CallTaskCB(task.tid, task.taskCB);
+
+            taskDic.Remove(task.tid);
+            task.taskCB = null;
         }
 
         void CallTaskCB(int tid, Action<int> taskCB)
@@ -167,12 +163,12 @@ namespace CodingK_EventSystem.HeapTimer
                 while (true)
                 {
                     ++m_tid;
-                    if (m_tid == Int32.MaxValue)
+                    if (m_tid == int.MaxValue)
                     {
-                        m_tid = 0;
+                        m_tid = int.MinValue;
                     }
 
-                    if (!taskQueue.ContainsKey(m_tid))
+                    if (!taskDic.ContainsKey(m_tid))
                     {
                         return m_tid;
                     }
@@ -195,13 +191,12 @@ namespace CodingK_EventSystem.HeapTimer
         public int AddTask(DateTime firstFireTime, Action<int> taskCB, Action<int> cancelCB, uint delay = 0, int count = 1)
         {
             int tid = GenerateTid();
-            double startTime = GetUtcMs();
-            double firstDelay = GetMsByDateTime(firstFireTime);
-            double destTime = startTime + firstDelay;
+            double destTime = GetMsByDateTime(firstFireTime);
             TimeStampTask task = new TimeStampTask(tid, delay, count, destTime, taskCB, cancelCB);
 
-            if (taskQueue.TryAdd(tid, task))
+            if (taskDic.TryAdd(tid, task))
             {
+                taskQueue.Enqueue(task);
                 return tid;
             }
             else
@@ -227,8 +222,9 @@ namespace CodingK_EventSystem.HeapTimer
             double destTime = startTime + firstDelay;
             TimeStampTask task = new TimeStampTask(tid, delay, count, destTime, taskCB, cancelCB);
 
-            if (taskQueue.TryAdd(tid, task))
+            if (taskDic.TryAdd(tid, task))
             {
+                taskQueue.Enqueue(task);
                 return tid;
             }
             else
@@ -240,8 +236,10 @@ namespace CodingK_EventSystem.HeapTimer
 
         public override bool DeleteTask(int tid)
         {
-            if (taskQueue.TryRemove(tid, out TimeStampTask task))
+            if (taskDic.Remove(tid, out TimeStampTask task))
             {
+                taskQueue.RemoveItem(task);
+
                 if (setHandle && task.cancelCB != null)
                 {
                     packQue.Enqueue(new TimeStampTaskPack(tid, task.cancelCB));
@@ -261,16 +259,14 @@ namespace CodingK_EventSystem.HeapTimer
 
         public override void Reset()
         {
-            if (packQue != null && !packQue.IsEmpty)
+            if (!packQue.IsEmpty)
             {
                 WarnFunc?.Invoke("Reset:packQue is not empty.");
             }
 
+            taskDic.Clear();
             taskQueue.Clear();
-            if (timerThread != null)
-            {
-                timerThread.Abort();
-            }
+            timerThread.Abort();
         }
 
         #endregion

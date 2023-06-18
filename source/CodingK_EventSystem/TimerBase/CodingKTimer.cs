@@ -4,9 +4,9 @@ using System.Text;
 
 namespace CodingK_EventSystem.TimerBase
 {
-    internal abstract class CodingKTimer
+    public abstract class CodingKTimer
     {
-        protected int m_tid = 0;
+        protected int m_tid = int.MinValue;
         protected abstract int GenerateTid();
 
         public Action<string> LogFunc;
