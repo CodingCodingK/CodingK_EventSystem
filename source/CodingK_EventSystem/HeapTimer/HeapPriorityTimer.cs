@@ -9,5 +9,6 @@ namespace CodingK_EventSystem.HeapTimer
     /// </summary>
     public class HeapPriorityTimer
     {
+
     }
 }

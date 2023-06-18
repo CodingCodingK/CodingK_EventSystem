@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Github\\CodingK_EventSystem\\source\\CodingK_EventSystem\\CodingK_EventSystem.csproj": {}
+    "C:\\Github\\CodingK_EventSystem\\source\\CodingKTimer\\CodingKTimer.csproj": {}
   },
   "projects": {
-    "C:\\Github\\CodingK_EventSystem\\source\\CodingK_EventSystem\\CodingK_EventSystem.csproj": {
+    "C:\\Github\\CodingK_EventSystem\\source\\CodingKTimer\\CodingKTimer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Github\\CodingK_EventSystem\\source\\CodingK_EventSystem\\CodingK_EventSystem.csproj",
-        "projectName": "CodingK_EventSystem",
-        "projectPath": "C:\\Github\\CodingK_EventSystem\\source\\CodingK_EventSystem\\CodingK_EventSystem.csproj",
+        "projectUniqueName": "C:\\Github\\CodingK_EventSystem\\source\\CodingKTimer\\CodingKTimer.csproj",
+        "projectName": "CodingKTimer",
+        "projectPath": "C:\\Github\\CodingK_EventSystem\\source\\CodingKTimer\\CodingKTimer.csproj",
         "packagesPath": "C:\\Users\\YAN JUNJIE\\.nuget\\packages\\",
-        "outputPath": "C:\\Github\\CodingK_EventSystem\\source\\CodingK_EventSystem\\obj\\",
+        "outputPath": "C:\\Github\\CodingK_EventSystem\\source\\CodingKTimer\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",

@@ -1,0 +1,10 @@
+C:\Github\CodingK_EventSystem\source\CodingK_EventSystem\bin\Debug\netstandard2.1\CodingK_EventSystem.deps.json
+C:\Github\CodingK_EventSystem\source\CodingK_EventSystem\bin\Debug\netstandard2.1\CodingK_EventSystem.dll
+C:\Github\CodingK_EventSystem\source\CodingK_EventSystem\bin\Debug\netstandard2.1\CodingK_EventSystem.pdb
+C:\Github\CodingK_EventSystem\source\CodingK_EventSystem\obj\Debug\netstandard2.1\CodingK_EventSystem.csproj.AssemblyReference.cache
+C:\Github\CodingK_EventSystem\source\CodingK_EventSystem\obj\Debug\netstandard2.1\CodingK_EventSystem.GeneratedMSBuildEditorConfig.editorconfig
+C:\Github\CodingK_EventSystem\source\CodingK_EventSystem\obj\Debug\netstandard2.1\CodingK_EventSystem.AssemblyInfoInputs.cache
+C:\Github\CodingK_EventSystem\source\CodingK_EventSystem\obj\Debug\netstandard2.1\CodingK_EventSystem.AssemblyInfo.cs
+C:\Github\CodingK_EventSystem\source\CodingK_EventSystem\obj\Debug\netstandard2.1\CodingK_EventSystem.csproj.CoreCompileInputs.cache
+C:\Github\CodingK_EventSystem\source\CodingK_EventSystem\obj\Debug\netstandard2.1\CodingK_EventSystem.dll
+C:\Github\CodingK_EventSystem\source\CodingK_EventSystem\obj\Debug\netstandard2.1\CodingK_EventSystem.pdb
